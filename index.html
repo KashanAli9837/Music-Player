@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Player</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/output.css" />
+  </head>
+  <body>
+    <!-- main loader -->
+
+    <div
+      class="main_loader_container w-full h-screen absolute top-0 left-0 z-[2000] flex justify-center items-center space-x-6 bg-[#DDD5EC] pointer-events-none select-none"
+    >
+      <div
+        class="main_loader rounded-full w-[8vw] h-[8vw] md:w-[4vw] md:h-[4vw] bg-[#7469B6]"
+      ></div>
+      <div
+        class="main_loader rounded-full w-[8vw] h-[8vw] md:w-[4vw] md:h-[4vw] bg-[#E1AFD1]"
+      ></div>
+      <div
+        class="main_loader rounded-full w-[8vw] h-[8vw] md:w-[4vw] md:h-[4vw] bg-[#AD88C6]"
+      ></div>
+    </div>
+
+    <!-- main -->
+
+    <div
+      class="flex justify-center items-center bg-[#DBD6EC] w-full h-screen overflow-hidden"
+    >
+      <!-- main > left -->
+
+      <div
+        id="main_left"
+        class="w-1/2 h-full flex flex-col justify-center items-center relative space-y-6 pt-12"
+      >
+        <!-- Song Name -->
+        <h2
+          class="song_name_displayer capitalize text-[2.2vw] font-medium text-[#E680B5]"
+        >
+          Bloody mary (Refrain)
+        </h2>
+
+        <!-- Video Stuff -->
+        <div id="video_stuff" class="w-[80%] h-[53%] relative overflow-hidden">
+          <!-- Video Loader -->
+          <div
+            class="video_loader_container w-full h-full absolute top-0 left-0 bg-[#DDD5EC] flex justify-center items-center z-50 space-x-4"
+          >
+            <div
+              class="video_loader w-[3vw] h-[3vw] rounded-full bg-[#7469B6]"
+            ></div>
+            <div
+              class="video_loader w-[3vw] h-[3vw] rounded-full bg-[#E1AFD1]"
+            ></div>
+            <div
+              class="video_loader w-[3vw] h-[3vw] rounded-full bg-[#AD88C6]"
+            ></div>
+          </div>
+
+          <div
+            id="video_error"
+            class="z-[100] absolute top-0 left-0 w-full h-full flex justify-center items-center bg-[#DDD5EC] text-red-600 text-6xl hidden"
+          >
+            !
+          </div>
+
+          <video
+            src="songs/song1.mp4"
+            id="video"
+            class="w-full h-full object-cover rounded-lg z-40"
+          ></video>
+
+          <!-- Volume Stuff -->
+          <div
+            class="volumeStuff w-fit absolute left-[5%] bottom-[-20%] px-[1.1vw] py-[0.4vw] flex items-center space-x-4 rounded-full bg-[#e680b5d8] transition-all duration-300 ease"
+          >
+            <img
+              src="icons/volume-high.svg"
+              class="cursor-pointer w-[2vw]"
+              alt="volume icon"
+              id="volume_icon"
+            />
+            <input
+              type="range"
+              class="volume-slider outline-none py-4 appearance-none bg-transparent cursor-pointer"
+              id="volume_range"
+              min="0"
+              max="100"
+              value="100"
+            />
+          </div>
+        </div>
+
+        <!-- Player -->
+        <div class="w-full flex flex-col justify-center items-center">
+          <!-- Player Top -->
+          <div class="flex justify-center items-center space-x-4">
+            <div
+              id="remaining_time"
+              class="whitespace-nowrap w-12 text-[#111617]"
+            >
+              <p>0 : 00</p>
+            </div>
+            <div class="duration_container w-[22rem] h-[30px] relative">
+              <input
+                type="range"
+                id="timelapse"
+                min="0"
+                max="184"
+                value="0"
+                class="bg-[#c6c1e0] cursor-pointer w-full h-[4px] outline-none m-0 py-0 rounded-lg"
+              />
+              <div
+                id="duration_progress"
+                class="absolute top-1/2 left-0 h-[4px] w-1/2 rounded-lg pointer-events-none -translate-y-1/2 bg-[#e680b580]"
+              ></div>
+            </div>
+            <div id="total_time" class="whitespace-nowrap text-[#111617]">
+              2 : 58
+            </div>
+            <img
+              src="icons/repeat-false.svg"
+              id="loop_icon"
+              class="w-[1.5rem] cursor-pointer"
+              alt="loop icon"
+            />
+          </div>
+
+          <!-- Player Bottom -->
+          <div class="text-[#111617] flex justify-center items-center mt-2">
+            <div
+              class="skippers w-[60px] h-[60px] rounded-full cursor-pointer hover:bg-white transition-all flex justify-center items-center"
+            >
+              <img
+                src="icons/skip-back.svg"
+                class="w-[2vw]"
+                alt="skip back icon"
+              />
+            </div>
+            <div
+              id="playPauseIcon_container"
+              class="w-[78px] h-[78px] rounded-full bg-[#e680b580] flex justify-center items-center mx-[1vw] cursor-pointer"
+            >
+              <div
+                class="bg-white rounded-full w-[60px] h-[60px] flex justify-center items-center"
+              >
+                <img
+                  src="icons/play.svg"
+                  alt="play icon"
+                  id="playPauseIcon"
+                  class="w-[2.5vw]"
+                />
+              </div>
+            </div>
+            <div
+              class="skippers w-[60px] h-[60px] rounded-full cursor-pointer hover:bg-white transition-all flex justify-center items-center"
+            >
+              <img
+                src="icons/skip-forward.svg"
+                class="w-[2vw]"
+                alt="skip-forward icon"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- player ended -->
+      </div>
+      <!-- main left ended -->
+
+      <!-- main right -->
+      <div
+        id="main_right"
+        class="w-[50%] h-full py-6 flex justify-start items-center flex-col scroll-smooth overflow-y-scroll"
+      ></div>
+    </div>
+    <!-- main ended -->
+
+    <script src="src/gsap.js"></script>
+    <script src="src/main.ts"></script>
+  </body>
+</html>
