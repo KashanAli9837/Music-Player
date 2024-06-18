@@ -7,6 +7,7 @@ Step 1: Add the `Songs Folder`
 ```
 npm run dev
 ```
+`Then change the script in index.html`
 
 ## For tailwind
 

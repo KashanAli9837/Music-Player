@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="css/output.css" />
   </head>
   <body>
+
+    <!-- Dynamic volume Indicator -->
+     <div id="dynamicVolumeInd" class="hidden absolute top-0 text-3xl z-[1000] pointer-events-none select-none text-[#E680B5]"></div>
+
     <!-- main loader -->
 
     <div
@@ -149,9 +153,8 @@
               >
                 <img
                   src="icons/play.svg"
-                  alt="play icon"
+                  alt="play & icon"
                   id="playPauseIcon"
-                  class="w-[2.5vw]"
                 />
               </div>
             </div>
@@ -179,7 +182,10 @@
     </div>
     <!-- main ended -->
 
-    <script src="src/gsap.js"></script>
-    <script src="src/main.ts"></script>
+    <!-- For JS -->
+    <script src="dist/main.js"></script>
+
+    <!-- For TS -->
+    <!-- <script type="module" src="src/main.ts"></script> -->
   </body>
 </html>
