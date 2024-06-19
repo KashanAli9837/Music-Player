@@ -1,5 +1,6 @@
-function loaderAnimation(Elements: string) {
-  return gsap.from(Elements, {
+import { gsap } from "gsap";
+function loaderAnimation(e: string) {
+  return gsap.from(e, {
     y: 50,
     stagger: {
       each: 0.2,
@@ -16,202 +17,228 @@ const videoLoaderAnimation = loaderAnimation(".video_loader");
 window.addEventListener("load", main);
 
 function main(): void {
-  // Type Aliases
-  type Div = HTMLDivElement;
-  type Elems = NodeListOf<HTMLElement>;
+  // Types
   type Elem = HTMLElement;
+  type Elems = NodeListOf<HTMLElement>;
   type Input = HTMLInputElement;
   type Image = HTMLImageElement;
+  type song = { title: string; format?: string };
+  type Songs = readonly song[];
+  type volumeIntensity = "high" | "medium" | "low" | "mute";
 
-  // removing main loader
-  function removeMainLoaderAnimation(): void {
-    const loader = document.querySelector(".main_loader_container") as Div;
+  // Short way to get element / elements
+
+  function gets(e: string) {
+    return document.querySelector(e) as Elem;
+  }
+  function get(e: string) {
+    return document.querySelectorAll(e) as Elems;
+  }
+
+  // To remove main loader
+
+  function removeMainLoader() {
+    const loader = gets(".main_loader_container");
 
     loader.style.display = "none";
     mainLoaderAnimation.kill();
   }
-
-  // Short way to get element / elements
-  class get {
-    // For Single Element
-    static elem(element: string): Elem {
-      return document.querySelector(element) as Elem;
-    }
-
-    // For Multiple Elements
-    static elems(elements: string): Elems {
-      return document.querySelectorAll(elements) as Elems;
-    }
-  }
+  removeMainLoader();
 
   // All Songs
-  const songs: string[][] = [
-    ["Bloody Mary (refrain)"],
-    ["She Knowns (Lyrics)"],
-    ["Crystal Castles - Empathy"],
-    ["Sia - Unstoppable (Lyrics)"],
-    ["Clovis Eyes Fluxxwave"],
-    ["Living Life in the Night", "mkv"],
-    ["From a Man + After Dark"],
-    ["Money so big"],
-    ["Bella Ciao"],
-    ["MAFIA - Trap Rap Beat"],
-    ["Let me Down Slowly"],
-    ["Thunder - imagine dragons"],
-    ["Memory Reboot"],
-    ["One Pumped PHONK"],
-    ["The last soul X last soul"],
-    ["SleepWalker"],
-    ["Pastel Ghost Dark Beach"],
-    ["Rage Time Funk"],
-    ["Edit Phonk"],
-    ["Metamorphosim - Interworld"],
-    ["Clandestina - Jvstin"],
-    ["Brodyaga Funk"],
-    ["Particles Slowed"],
-    ["As It Was"],
-    ["idfc - blackbear"],
-    ["Rapture (Slowed + Reverb)"],
-    ["ShootOut (Slowed + Reverb)"],
-    ["On My Own"],
-    ["Choix de vie"],
-    ["Hensonn - Sahara"],
-    ["Sweater Weather"],
+  const songs: Songs = [
+    { title: "Bloody Mary (refrain)" },
+    { title: "She Knowns (Lyrics)" },
+    { title: "Crystal Castles - Empathy" },
+    { title: "Sia - Unstoppable (Lyrics)" },
+    { title: "Clovis Eyes Fluxxwave" },
+    {
+      title: "Living Life in the Night",
+      format: "mkv",
+    },
+    { title: "From a Man + After Dark" },
+    { title: "Money so big" },
+    { title: "Bella Ciao" },
+    { title: "MAFIA - Trap Rap Beat" },
+    { title: "const me Down Slowly" },
+    { title: "Thunder - imagine dragons" },
+    { title: "Memory Reboot" },
+    { title: "One Pumped PHONK" },
+    { title: "The last soul X last soul" },
+    { title: "SleepWalker" },
+    { title: "Pastel Ghost Dark Beach" },
+    { title: "Rage Time Funk" },
+    { title: "Edit Phonk" },
+    { title: "Metamorphosim - Interworld" },
+    { title: "Clandestina - Jvstin" },
+    { title: "Brodyaga Funk" },
+    { title: "Particles Slowed" },
+    { title: "As It Was" },
+    { title: "idfc - blackbear" },
+    { title: "Rapture (Slowed + Reverb)" },
+    { title: "ShootOut (Slowed + Reverb)" },
+    { title: "On My Own" },
+    { title: "Choix de vie" },
+    { title: "Hensonn - Sahara" },
+    { title: "Sweater Weather" },
+    { title: "I like the way you kiss me X the perfect girl" },
   ];
 
   // selecting elements
-  const video = get.elem("video") as HTMLVideoElement;
-  const timelapse = get.elem("#timelapse") as HTMLInputElement;
-  const remTimeInd = get.elem("#remaining_time");
-  const playPauseIcon = get.elem("#playPauseIcon") as Image;
-  const line = get.elem("#duration_progress");
-  const loopIcon = get.elem("#loop_icon") as HTMLImageElement;
-  const volumeRange = get.elem("#volume_range") as Input;
-  const volumeIcon = get.elem("#volume_icon") as Image;
+  const video = gets("video") as HTMLVideoElement;
+  const volumeRange = gets("#volume_range") as Input;
+  const timelapse = gets("#timelapse") as Input;
+  const loopIcon = gets("#loop_icon") as Image;
+  const remTimeInd = gets("#remaining_time");
+  const line = gets("#duration_progress");
+  const right = gets("#main_right");
 
   let isVideoPlaying: boolean = false;
   let isLoop: boolean = false;
   let originalVolume: number;
-  let originalVolumeIcon: string;
+  let originalVolumeIcon: volumeIntensity;
+  let isMute: boolean = false;
 
   let remainingTimeInterval: number;
   let timelapseInterval: number;
   let durationLineInterval: number;
 
-  // Adding Songs Name
-  function addSongsName(): void {
-    const right = get.elem("#main_right");
-    let clutter: string = "";
+  function getSongName(song: song): string {
+    const title = song.title;
 
-    songs.forEach((song) => {
-      clutter += `<h4>${song[0]}</h4>`;
-    });
+    if (title.length > 22) {
+      return `${title.slice(0, 22)}...`;
+    }
 
-    right.innerHTML = clutter;
+    return title;
   }
-  addSongsName();
 
-  const h4 = get.elems("#main_right h4");
+  function addSongs(): void {
+    right.innerHTML = "";
 
-  function updateSong(i: number = 0): void {
-    video.addEventListener("error", showError);
+    songs.forEach((song, i) => {
+      const songElement = document.createElement("h4");
+      songElement.textContent = getSongName(song);
+      songElement.classList.add(`${i}`);
+      right.appendChild(songElement);
+    });
+  }
+  addSongs();
 
-    // If the given index is wrong
+  // Selecting songNames
+  const songNames = get("#main_right h4");
+
+  function handleError(i: number) {
+    const errorContainer = gets("#video_error");
+
+    const showError = () => {
+      errorContainer.classList.remove("hidden");
+    };
+
     if (i < 0 || i >= songs.length) {
       showError();
     }
+    video.addEventListener("error", showError);
 
-    function showError(): void {
-      const errorDiv = get.elem("#video_error");
-      errorDiv.classList.remove("hidden");
+    // Otherwise Remove Error
+    errorContainer.classList.add("hidden");
+  }
 
-      return;
-    }
+  function updateComponents(i: number) {
+    const songNameDisplayer = gets(".song_name_displayer");
 
-    const songNameDisplayer = get.elem(".song_name_displayer");
-
-    h4.forEach((h4) => {
-      h4.className = "";
+    songNames.forEach((songName) => {
+      songName.classList.remove("active");
     });
 
-    h4[i].className = "active";
+    songNames[i].classList.add("active");
     video.src = `songs/song${i + 1}.${checkFormat(i)}`;
-    songNameDisplayer.innerHTML = `${i + 1}. ${songs[i][0]}`;
+    songNameDisplayer.textContent = `${i + 1}. ${getSongName(songs[i])}`;
+
+    // To check Video Format
+    function checkFormat(i: number) {
+      let hasFormat = songs[i]["format"];
+      return hasFormat ?? "mp4";
+    }
+  }
+
+  function refreshTimelapse() {
     timelapse.value = "0";
     line.style.width = "0";
+  }
 
-    (function workingWithVideo(): void {
-      const videoLoaderContainer = get.elem(".video_loader_container");
-      displayVideoLoader(videoLoaderContainer);
+  function videoLoader() {
+    const videoLoaderContainer = gets(".video_loader_container");
+    displayLoader();
 
-      video.addEventListener("loadedmetadata", () => {
-        putDuration();
-      });
+    video.addEventListener("canplaythrough", () => {
+      removeLoader();
+    });
 
-      editSong(i, 19, "0 : 38", 6);
-      editSong(i, 25, "2 : 02");
-      editSong(i, 26, "2 : 35");
-
-      video.addEventListener("canplaythrough", (): void => {
-        removeVideoLoader(videoLoaderContainer);
-
-        video.addEventListener("ended", (): void => {
-          if (!video.loop) {
-            pauseVideo();
-          }
-        });
-      });
-    })();
-
-    function displayVideoLoader(elem: Elem): void {
-      elem.style.display = "flex";
+    function displayLoader() {
+      videoLoaderContainer.style.display = "flex";
       videoLoaderAnimation.play();
     }
 
-    function removeVideoLoader(elem: Elem): void {
-      elem.style.display = "none";
+    function removeLoader() {
+      videoLoaderContainer.style.display = "none";
       videoLoaderAnimation.pause();
     }
   }
 
-  // Check Video Format
-  function checkFormat(i: number): string {
-    let hasFormat: string = songs[i][1];
-
-    if (hasFormat) {
-      return hasFormat;
-    }
-
-    return "mp4";
+  function trackEnd() {
+    video.addEventListener("ended", () => {
+      if (!video.loop) {
+        pauseVideo();
+      }
+    });
   }
 
-  // adding listeners to the song names
-  function playSongByUser(): void {
-    h4.forEach((h4, i) => {
-      h4.addEventListener("click", () => {
-        updateSong(i);
-        checkSongCondition();
-        saveData("songIdx", String(i));
-      });
-    });
+  function displayDuration(i: number) {
+    video.addEventListener("loadeddata", () => {
+      putDuration();
 
-    function checkSongCondition(): void {
-      if (isVideoPlaying) {
-        video.play();
-      } else {
-        video.pause();
-      }
+      editSong(i, 19, "0 : 06", "0 : 38");
+      editSong(i, 25, "start", "2 : 02");
+      editSong(i, 26, "start", "2 : 35");
+      editSong(i, 32, "0 : 10", "0 : 45");
+    });
+  }
+
+  function updateSong(i = 0) {
+    handleError(i);
+    refreshTimelapse();
+    updateComponents(i);
+    videoLoader();
+    displayDuration(i);
+    trackEnd();
+  }
+
+  function checkSongCondition() {
+    if (isVideoPlaying) {
+      video.play();
+    } else {
+      video.pause();
     }
+  }
+
+  // Playing song based on click
+  function playSongByUser() {
+    right.addEventListener("click", (e) => {
+      const target = e.target as HTMLHeadingElement;
+      const idx = +target.classList[0];
+
+      if (idx) {
+        updateSong(idx);
+        checkSongCondition();
+        saveData("songIdx", idx.toString());
+      }
+    });
   }
 
   function putDuration() {
-    const totalTimeIndicator = get.elem("#total_time");
+    const totalTimeIndicator = gets("#total_time");
     const duration = Math.floor(video.duration);
-
-    function calcRemDur(): string {
-      const currentTime = Math.floor(video.currentTime);
-      return changeFormat(currentTime);
-    }
 
     function calcTotalDur(): string {
       return changeFormat(duration);
@@ -233,36 +260,55 @@ function main(): void {
     return `${minutes} : ${seconds}`;
   }
 
-  function playVideo() {
-    playPauseIcon.src = "icons/pause.svg";
-    video.play();
-    isVideoPlaying = true;
+  function createIcon(Icon: "play" | "pause") {
+    const icon = document.createElement("img");
+    icon.src = "icons/pause.svg";
+    icon.alt = "play & pause icon";
+    icon.id = "playPauseIcon";
+    icon.src = `icons/${Icon}.svg`;
+    return icon;
+  }
 
-    remainingTimeInterval = setInterval(() => {
-      remTimeInd.innerHTML = calcRemDur();
-    }, 1);
-    timelapseInterval = setInterval(() => {
-      timelapse.value = String(video.currentTime);
-    }, 1);
-    durationLine();
+  function playVideo() {
+    const playIcon = gets("#playPauseIcon");
+    const pauseIcon = createIcon("pause");
+
+    pauseIcon.addEventListener("load", () => {
+      playIcon.replaceWith(pauseIcon);
+      video.play();
+      isVideoPlaying = true;
+
+      remainingTimeInterval = setInterval(() => {
+        remTimeInd.innerHTML = calcRemDur();
+      }, 100);
+      timelapseInterval = setInterval(() => {
+        timelapse.value = video.currentTime.toString();
+      }, 100);
+      durationLine();
+    });
   }
 
   function pauseVideo() {
-    playPauseIcon.src = "icons/play.svg";
-    video.pause();
-    isVideoPlaying = false;
+    const pauseIcon = gets("#playPauseIcon");
+    const playIcon = createIcon("play");
 
-    clearInterval(remainingTimeInterval);
-    clearInterval(timelapseInterval);
-    clearInterval(durationLineInterval);
+    playIcon.addEventListener("load", () => {
+      pauseIcon.replaceWith(playIcon);
+      video.pause();
+      isVideoPlaying = false;
+
+      clearInterval(remainingTimeInterval);
+      clearInterval(timelapseInterval);
+      clearInterval(durationLineInterval);
+    });
   }
 
-  function playPauseFuncationality(): void {
-    const playPauseBtn = get.elem("#playPauseIcon_container");
+  function playPauseFuncationality() {
+    const playPauseBtn = gets("#playPauseIcon_container");
     playPauseBtn.addEventListener("click", playOrPause);
   }
 
-  function playOrPause(): void {
+  function playOrPause() {
     if (!isVideoPlaying) {
       playVideo();
     } else {
@@ -270,36 +316,45 @@ function main(): void {
     }
   }
 
-  function backAndForwardFunctionality(): void {
-    const skippers = document.querySelectorAll(".skippers");
+  function backAndForwardFunctionality() {
+    const skippers = get(".skippers");
 
     skippers.forEach((icon, i) => {
       icon.addEventListener("click", () => {
-        if (i === 0) {
-          video.currentTime -= 5;
-        } else if (i === 1) {
-          video.currentTime += 5;
-        }
-        backAndForward();
+        backAndForward(i);
       });
     });
   }
 
-  function backAndForward(): void {
-    remTimeInd.innerHTML = calcRemDur();
-    moveDurationLine();
-    timelapse.value = `${video.currentTime}`;
+  function backAndForward(i: number) {
+    if (i === 0) {
+      video.currentTime -= 5;
+    } else {
+      video.currentTime += 5;
+    }
+    refreshComponents();
   }
 
-  function moveVideo(): void {
-    timelapse.addEventListener("input", () => {
+  function refreshComponents(check: boolean = true) {
+    remTimeInd.innerHTML = calcRemDur();
+    moveDurationLine();
+
+    if (check) {
+      timelapse.value = `${video.currentTime}`;
+    } else {
       video.currentTime = +timelapse.value;
-      remTimeInd.innerHTML = calcRemDur();
-      moveDurationLine();
+    }
+  }
+
+  function moveVideo() {
+    ["input", "click"].forEach((e) => {
+      timelapse.addEventListener(e, () => {
+        refreshComponents(false);
+      });
     });
   }
 
-  function durationLine(): void {
+  function durationLine() {
     durationLineInterval = setInterval(() => {
       moveDurationLine();
     }, 1);
@@ -307,17 +362,19 @@ function main(): void {
 
   function moveDurationLine(): void {
     const time = Math.floor((video.currentTime / video.duration) * 100);
+
     gsap.to(line, {
       width: `${time}%`,
       ease: "power4",
     });
   }
 
-  function makeLoop(): void {
+  function makeLoop() {
     video.loop = true;
     loopIcon.src = `icons/repeat-true.svg`;
     isLoop = true;
   }
+
   function remvoeLoop(): void {
     video.loop = false;
     loopIcon.src = `icons/repeat-false.svg`;
@@ -334,63 +391,95 @@ function main(): void {
     } else {
       remvoeLoop();
     }
-    saveData("loop", String(isLoop));
+    saveData("loop", isLoop.toString());
   }
-  let isMute: boolean = false;
 
-  function setVol(): void {
+  function createVolumeIcon(intensity: volumeIntensity) {
+    const volumeIcon = gets("#volume_icon");
+    const icon = document.createElement("img");
+
+    icon.src = `icons/volume-${intensity}.svg`;
+    icon.className = "cursor-pointer w-[2vw]";
+    icon.alt = "volume icon";
+    icon.id = "volume_icon";
+
+    icon.addEventListener("load", () => {
+      volumeIcon.replaceWith(icon);
+    });
+  }
+
+  function setVol() {
     const volume = +volumeRange.value;
     video.volume = volume / 100;
+    isMute = false;
 
-    if (volume > 80) {
-      volumeIcon.src = "icons/volume-high.svg";
-    } else if (volume > 25) {
-      volumeIcon.src = "icons/volume-medium.svg";
-    } else if (volume > 0) {
-      volumeIcon.src = "icons/volume-low.svg";
-    } else {
-      volumeIcon.src = "icons/volume-mute.svg";
+    switch (true) {
+      case volume > 80:
+        createVolumeIcon("high");
+        break;
+      case volume > 25:
+        createVolumeIcon("medium");
+        break;
+      case volume > 0:
+        createVolumeIcon("low");
+        break;
+
+      default:
+        createVolumeIcon("mute");
+        break;
     }
+
+    saveData("volume", volumeRange.value.toString());
+  }
+
+  function findIntensity(): volumeIntensity {
+    const volumeIcon = gets(".volumeStuff > img") as Image;
+    const src = volumeIcon.src;
+    const starting = src.indexOf("-") + 1;
+    const ending = src.lastIndexOf(".");
+
+    return src.slice(starting, ending) as volumeIntensity;
   }
 
   function muteUnmute() {
-    if (isMute) {
-      volumeIcon.src = originalVolumeIcon;
+    if (isMute && video.volume === 0) {
+      createVolumeIcon(originalVolumeIcon);
       video.volume = originalVolume;
-      volumeRange.value = String(originalVolume * 100);
-      isMute = false;
+      volumeRange.value = (originalVolume * 100).toString();
     } else {
       originalVolume = video.volume;
-      originalVolumeIcon = volumeIcon.src;
+      originalVolumeIcon = findIntensity();
 
-      volumeIcon.src = "icons/volume-mute.svg";
+      createVolumeIcon("mute");
       video.volume = 0;
       volumeRange.value = "0";
-      isMute = true;
     }
+
+    isMute = !isMute;
+    saveData("volume", volumeRange.value.toString());
   }
 
   function makeVolFunctionality(): void {
     volumeRange.addEventListener("input", () => {
       setVol();
-      saveData("volume", String(volumeRange.value));
     });
   }
 
-  function makeKeyboardFunctionality(): void {
-    document.addEventListener("keydown", (e) => {
+  function shortcutsFunctionality() {
+    window.addEventListener("keydown", (e) => {
+      if (e.repeat) {
+        return;
+      }
       switch (e.key) {
         case " ":
-          playOrPause();
           e.preventDefault();
+          playOrPause();
           break;
         case "ArrowRight":
-          video.currentTime += 5;
-          backAndForward();
+          backAndForward(1);
           break;
         case "ArrowLeft":
-          video.currentTime -= 5;
-          backAndForward();
+          backAndForward(0);
           break;
         case "l":
           changeLoopFunctionality();
@@ -405,40 +494,51 @@ function main(): void {
   function editSong(
     i: number,
     editSongIdx: number,
-    time: string,
-    startingTime?: number
-  ): void {
+    startingTime: string | "start",
+    endingTime: string | "end"
+  ) {
     if (i + 1 === editSongIdx) {
       video.addEventListener("timeupdate", (): void => {
-        if (remTimeInd.innerHTML >= time) {
-          if (video.loop) {
-            video.currentTime = 0;
-          } else {
-            pauseVideo();
+        if (endingTime !== "end") {
+          if (remTimeInd.innerHTML > endingTime) {
+            if (video.loop) {
+              video.currentTime = 0;
+            } else {
+              pauseVideo();
+            }
           }
         }
 
-        if (startingTime) {
-          if (video.currentTime < startingTime) {
-            video.currentTime = startingTime;
+        if (startingTime !== "start") {
+          if (remTimeInd.innerHTML < startingTime) {
+            const seconds = changeTimeIntoSec(startingTime);
+
+            video.currentTime = seconds;
+            timelapse.value = seconds.toString();
+            moveDurationLine();
           }
         }
       });
     }
   }
 
-  function saveData(n: string, v: string): void {
+  function changeTimeIntoSec(time: string): number {
+    const splittedTime = time.split(" : ");
+    return +splittedTime[0] * 60 + +splittedTime[1];
+  }
+
+  function saveData(n: string, v: string) {
     localStorage.setItem(n, v);
   }
 
-  function showData(): void {
+  function showData() {
     const songIdx = localStorage.getItem("songIdx") as string;
     const loop = localStorage.getItem("loop") as string;
     const volume = localStorage.getItem("volume") as string;
 
     if (songIdx) {
       updateSong(+songIdx);
-      h4[+songIdx].scrollIntoView();
+      songNames[+songIdx].scrollIntoView();
     }
 
     if (loop) {
@@ -452,7 +552,45 @@ function main(): void {
     }
   }
 
-  removeMainLoaderAnimation();
+  function dynamicVolumeFunctionality() {
+    window.addEventListener("mousedown", () => {
+      window.addEventListener("mousemove", dynamicVolume);
+    });
+
+    window.addEventListener("mouseup", () => {
+      window.removeEventListener("mousemove", dynamicVolume);
+      showDynamicVolume(false);
+    });
+  }
+
+  function dynamicVolume(e: any) {
+    const { top, bottom } = video.getBoundingClientRect();
+    const y = Math.floor(gsap.utils.mapRange(bottom, top, 0, 100, e.y));
+    const condY = y >= 0 && y <= 100;
+    const condX = e.x >= 612 && e.x <= 700;
+
+    if (condY && condX) {
+      volumeRange.value = y.toString();
+      setVol();
+
+      const indicator = gets("#dynamicVolumeInd");
+      indicator.style.left = `${e.x + 20}px`;
+      indicator.style.top = `${e.y - 5}px`;
+      indicator.textContent = `${y}%`;
+      showDynamicVolume(true);
+    }
+  }
+
+  function showDynamicVolume(what: boolean) {
+    const indicator = gets("#dynamicVolumeInd");
+
+    if (what) {
+      indicator.classList.remove("hidden");
+    } else {
+      indicator.classList.add("hidden");
+    }
+  }
+
   updateSong();
   playSongByUser();
   playPauseFuncationality();
@@ -460,6 +598,7 @@ function main(): void {
   moveVideo();
   makeLoopFunctionality();
   makeVolFunctionality();
-  makeKeyboardFunctionality();
+  shortcutsFunctionality();
   showData();
+  dynamicVolumeFunctionality();
 }
