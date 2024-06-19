@@ -594,6 +594,10 @@ video {
   z-index: 50;
 }
 
+.z-\[1000\] {
+  z-index: 1000;
+}
+
 .z-\[100\] {
   z-index: 100;
 }
@@ -671,10 +675,6 @@ video {
   width: 1.5rem;
 }
 
-.w-\[2\.5vw\] {
-  width: 2.5vw;
-}
-
 .w-\[22rem\] {
   width: 22rem;
 }
@@ -714,6 +714,10 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-\[2\.5vw\] {
+  width: 2.5vw;
 }
 
 .-translate-y-1\/2 {
@@ -874,6 +878,11 @@ video {
 
 .pt-12 {
   padding-top: 3rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
 }
 
 .text-6xl {
