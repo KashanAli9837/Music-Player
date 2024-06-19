@@ -83,3 +83,7 @@ body {
 #video_stuff:hover .volumeStuff {
   bottom: 10%;
 }
+
+#playPauseIcon_container img{
+  width: 2.5vw;
+}
